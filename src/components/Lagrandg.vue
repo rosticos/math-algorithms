@@ -6,8 +6,8 @@
       <label>'{{ index }}'y) </label>
       <input type="text" v-model.number="field.valueY">
     </div>
-      <label>'Point) </label>
-      <input type="text" v-model.number="point">
+    <label>'Point) </label>
+    <input type="text" v-model.number="point">
     <div>
       <button @click="addField" v-if="fields.length < 10">Add field</button>
       <button @click="removeField" v-if="fields.length">Remove field</button>
