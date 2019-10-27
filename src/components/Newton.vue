@@ -11,12 +11,11 @@
       <button @click="removeField" v-if="fields.length">Remove field</button>
       <button @click="countTable">Count</button>
     </div>
+    <vue-mathjax :formula="`$$ ${kek} $$`"></vue-mathjax>
   </div>
 </template>
 
 <script>
-import VueMathjax from 'vue-mathjax'
-
 function countYiDiff (arr) {
   let detArr = []
   for (let i = 1; i < arr.length; i++) {
@@ -26,17 +25,21 @@ function countYiDiff (arr) {
   return detArr
 }
 
-function makeExpressionLetters (arr) {
+const makeExpressionLetters = (arr) => {
   let xExpLetters = 'y_0'
   for (let i = 1; i < arr.length; i++) {
     if (i === 1) {
-      xExpLetters += '(\\Delta*y_0'
+      xExpLetters += '+ \\frac{\\Delta y_0}{h}(\\tilde{x}-x_0)'
     } else {
-
+      xExpLetters += `+ \\frac{\\Delta^${i}y_0}{h^${i} \\cdot ${i}!}`
+      for (let j = 0; j < i; j++) {
+        xExpLetters += `(\\tilde{x}-x_${j})`
+      }
     }
   }
   return xExpLetters
 }
+
 export default {
   data () {
     return {
@@ -45,7 +48,8 @@ export default {
         { labelX: 'X', valueX: '-3', labelY: 'Y', valueY: '-4' },
         { labelX: 'X', valueX: '-1', labelY: 'Y', valueY: '3' },
         { labelX: 'X', valueX: '1', labelY: 'Y', valueY: '-3' }
-      ]
+      ],
+      kek: ''
     }
   },
   methods: {
@@ -66,7 +70,9 @@ export default {
         console.log(YiArr)
         resultArr.push(YiArr)
       }
+      this.kek = makeExpressionLetters(this.fields)
       console.log(resultArr)
+      console.log(m)
     }
   }
 }

@@ -6,39 +6,39 @@
       <label>'{{ index }}'y) </label>
       <input type="text" v-model.number="field.valueY">
     </div>
+      <label>'Point) </label>
+      <input type="text" v-model.number="point">
     <div>
       <button @click="addField" v-if="fields.length < 10">Add field</button>
       <button @click="removeField" v-if="fields.length">Remove field</button>
       <button @click="countResultsL">Count</button>
       <button @click="paintChart">Paint</button>
     </div>
-    <p v-if="resultsL.length">Начальные уравнения:</p>
     <div v-if="resultsL.length">
-      <p v-for="(l, index) in resultsL" :key="`L-${index}`">L{{ index }} = {{ l.numerator }} / {{ l.denominator }}</p>
+      <p>Начальные уравнения:</p>
+      <div style="display: flex; flex-wrap: wrap; ">
+        <div v-for="(value, index) in resultsL" :key="`res-${index}`" style="margin-bottom: 32px; flex: 1 1 100%;">
+          <vue-mathjax v-if="value != null" :formula="`$$l_${index} = ${fields[index].valueY} * {${value.numerator.join('')} \\over${value.denominator.join('')}} = ${fields[index].valueY} *  {${countedResultL[index].numerator} \\over${countedResultL[index].denominator}}= ${answerL[index].replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')} $$`"></vue-mathjax>
+        </div>
+      </div>
+      <p>График интерполяционного многочлена Лагранджа</p>
+      <vue-mathjax :formula="`$$ L_${fields.length - 1}(x) = ${grapg.replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')} $$`"></vue-mathjax>
     </div>
-    <div v-if="countedResultL.length">
-      {{ countedResultL }}
+    <div style="display: flex; justify-content: center; margin-top: 20px;">
+      <line-chart
+        v-if="renderChart"
+        :func="grapg"
+        style="max-width: 500px; max-height: 500px;"
+        ref="line-chart"
+      />
     </div>
-    <br>
-    <div v-if="answerL.length">
-      {{ answerL }}
-    </div>
-    <br>
-    <div>
-      {{ grapg }}
-    </div>
-    <line-chart
-      v-if="renderChart"
-      :func="grapg"
-      style="max-width: 500px; max-height: 500px;"
-      ref="line-chart"
-    />
   </div>
 </template>
 
 <script>
 import algebra from 'algebra.js'
 import LineChart from './LineChart'
+
 export default {
   components: { LineChart },
   data () {
@@ -55,7 +55,8 @@ export default {
       resultsL: [],
       answerL: [],
       grapg: '',
-      renderChart: false
+      renderChart: false,
+      point: ''
     }
   },
   methods: {
@@ -126,6 +127,11 @@ export default {
     },
     paintChart () {
       this.renderChart(this.answerL)
+    }
+  },
+  computed: {
+    numeratorIndex1 () {
+      return `$$ ${this.countedResultL[0].numerator} $$`
     }
   }
 }
