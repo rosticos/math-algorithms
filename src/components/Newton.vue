@@ -1,31 +1,36 @@
 <template>
-  <div>
+  <div class="input-form_middle">
     <div>
       <label>Шаг между узловыми точками (h):</label>
       <input type="text" v-model.number="diff">
     </div>
-    <br>
     <div>
       <label>Количество точек:</label>
       <input type="text" v-model.number="pointsAmmount">
     </div>
-    <br>
     <div>
       <label>Начальная точка:</label>
       <input type="text" v-model.number="start">
     </div>
-    <br>
-
-    <div v-for="(field, index) in fields" :key="index">
-      <label>'{{ index }}'x) </label>
-      <input type="text" v-model.number="field.valueX">
-      <label>'{{ index }}'y) </label>
-      <input type="text" v-model.number="field.valueY">
-    </div>
-
     <div>
-      <button @click="init" v-if="fields.length < 10">Init fields</button>
+      <label>Точка:</label>
+      <input type="text" v-model.number="point">
+    </div>
+    <div>
+      <button @click="init">Init fields</button>
       <button @click="countTable">Count</button>
+    </div>
+    <div>
+      <div v-if="fields.length > 0" class="input-form">
+        <span class="input-form__item_text">i</span>
+        <span class="input-form__item_text">x</span>
+        <span class="input-form__item_text">y</span>
+      </div>
+      <div v-for="(field, index) in fields" :key="index" class="input-form">
+        <input type="text" :value="index" disabled class="input-form__item">
+        <input type="text" :value="field.valueX" disabled class="input-form__item">
+        <input type="text" v-model.number="field.valueY" class="input-form__item">
+      </div>
     </div>
 
     <div class="ended-table">
@@ -48,7 +53,6 @@
       </div>
     </div>
 
-    <vue-mathjax :formula="`$$ ${ newtonFormule } $$`"></vue-mathjax>
     <vue-mathjax :formula="`$$ P_${fields.length - 1} = ${ newtonFormule } $$`"></vue-mathjax>
     <vue-mathjax :formula="`$$ ${ xExpLetters } = ${this.countExp.replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')} = ${this.countExpDec}$$`"></vue-mathjax>
   </div>
@@ -108,7 +112,7 @@ const makeExpressionNumbers = (arr, xArr, y0, h, point) => {
     } else {
       xExpLetters += `+ \\frac{${arr[i][0]}}{${h}^${i + 1} \\cdot ${i + 1}!}`
       countExp += `+ (${arr[i][0]} / (${h}^${i + 1} * ${factorial(i + 1)}))`
-      
+
       for (let j = 0; j <= i; j++) {
         if (xArr[j] > 0) {
           xExpLetters += `(${point} - ${xArr[j]})`

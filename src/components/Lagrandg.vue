@@ -1,29 +1,49 @@
 <template>
-  <div>
-    <div v-for="(field, index) in fields" :key="index">
-      <label>'{{ index }}'x) </label>
-      <input type="text" v-model.number="field.valueX">
-      <label>'{{ index }}'y) </label>
-      <input type="text" v-model.number="field.valueY">
-    </div>
-    <label>'Point) </label>
-    <input type="text" v-model.number="point">
+  <div class="input-form_middle">
     <div>
-      <button @click="addField" v-if="fields.length < 10">Add field</button>
-      <button @click="removeField" v-if="fields.length">Remove field</button>
-      <button @click="countResultsL">Count</button>
-      <button @click="paintChart">Paint</button>
+      <label>Шаг между узловыми точками (h):</label>
+      <input type="text" v-model.number="diff">
     </div>
-    <div v-if="resultsL.length">
-      <p>Начальные уравнения:</p>
-      <div style="display: flex; flex-wrap: wrap; ">
+    <div>
+      <label>Количество точек:</label>
+      <input type="text" v-model.number="pointsAmmount">
+    </div>
+    <div>
+      <label>Начальная точка:</label>
+      <input type="text" v-model.number="start">
+    </div>
+    <div>
+      <label>Точка:</label>
+      <input type="text" v-model.number="point">
+    </div>
+    <div>
+      <button @click="init">Init fields</button>
+      <button @click="countResultsL">Count</button>
+    </div>
+    <div>
+      <div v-if="fields.length > 0" class="input-form">
+        <span class="input-form__item_text">i</span>
+        <span class="input-form__item_text">x</span>
+        <span class="input-form__item_text">y</span>
+      </div>
+      <div v-for="(field, index) in fields" :key="index" class="input-form">
+        <input type="text" :value="index" disabled class="input-form__item">
+        <input type="text" :value="field.valueX" disabled class="input-form__item">
+        <input type="text" v-model.number="field.valueY" class="input-form__item">
+      </div>
+    </div>
+
+    <div v-if="resultsL.length" class="input-form_middle">
+      <h4>Начальные уравнения</h4>
+      <div class="initial_eq">
         <div v-for="(value, index) in resultsL" :key="`res-${index}`" style="margin-bottom: 32px; flex: 1 1 100%;">
           <vue-mathjax v-if="value != null" :formula="`$$l_${index} = ${fields[index].valueY} * {${value.numerator.join('')} \\over${value.denominator.join('')}} = ${fields[index].valueY} *  {${countedResultL[index].numerator} \\over${countedResultL[index].denominator}}= ${answerL[index].replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')} $$`"></vue-mathjax>
         </div>
       </div>
-      <p>График интерполяционного многочлена Лагранджа</p>
+      <h4>График интерполяционного многочлена Лагранджа</h4>
       <vue-mathjax :formula="`$$ L_${fields.length - 1}(x) = ${grapg.replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')} $$`"></vue-mathjax>
     </div>
+
     <div style="display: flex; justify-content: center; margin-top: 20px;">
       <line-chart
         v-if="renderChart"
@@ -32,12 +52,51 @@
         ref="line-chart"
       />
     </div>
+
+    <div v-for="(item, index) in resultWithNumbers" :key="`resultWIthNum-${index}`">
+      <vue-mathjax :formula="`$$ \\frac{ ${item} }{ ${resultWithLetters[index]} } = \\frac{ ${resultsL[index].numerator.join('').replace(/x/g, point)} }{ ${resultsL[index].denominator.join('')} } = \\frac{ ${resultForEachArr[index].num} }{ ${resultForEachArr[index].denum} } $$`"></vue-mathjax>
+    </div>
   </div>
 </template>
 
 <script>
 import algebra from 'algebra.js'
 import LineChart from './LineChart'
+import { evaluate, parse } from 'mathjs'
+
+const countWithPoint = (arr, point) => {
+  let result = arr.map(el => {
+    console.log(el)
+    let num = parse(el.numerator.join('')).evaluate({ x: point })
+    let denum = parse(el.denominator.join('')).evaluate()
+    return {
+      num,
+      denum
+    }
+  })
+  return result
+}
+
+const makeLetterString = (arr) => {
+  const numerator = []
+  const denum = []
+  for (let i = 0; i < arr.length; i++) {
+    let numStr = ''
+    let denumStr = ''
+    for (let j = 0; j < arr.length; j++) {
+      if (j !== i) {
+        numStr += `(\\tilde{x}-x_${j})`
+        denumStr += `(x_${i}-x_${j})`
+      }
+    }
+    numerator.push(numStr)
+    denum.push(denumStr)
+  }
+  return {
+    numerator,
+    denum
+  }
+}
 
 export default {
   components: { LineChart },
@@ -46,20 +105,32 @@ export default {
       /* eslint-disable */
       countedResultL : [],
       /* eslint-enable */
-      fields: [
-        { labelX: 'X', valueX: '-1', labelY: 'Y', valueY: '4' },
-        { labelX: 'X', valueX: '1', labelY: 'Y', valueY: '1' },
-        { labelX: 'X', valueX: '3', labelY: 'Y', valueY: '-1' },
-        { labelX: 'X', valueX: '5', labelY: 'Y', valueY: '2' }
-      ],
+      fields: [],
       resultsL: [],
       answerL: [],
       grapg: '',
       renderChart: false,
-      point: ''
+      point: 2,
+      diff: 2,
+      start: -1,
+      pointsAmmount: 4,
+      resultWithNumbers: [],
+      resultWithLetters: [],
+      resultForEachArr: []
     }
   },
   methods: {
+    init () {
+      this.fields = []
+      for (let i = 0; i < this.pointsAmmount; i++) {
+        this.fields.push({
+          labelX: 'X',
+          valueX: `${Number(this.start) + this.diff * i}`,
+          labelY: 'Y',
+          valueY: '' }
+        )
+      }
+    },
     addField () {
       this.fields.push(
         { labelX: 'X', valueX: '', labelY: 'Y', valueY: '' }
@@ -90,7 +161,7 @@ export default {
         }
         this.resultsL.push({ numerator, denominator })
       }
-      console.log(this.resultsL)
+
       this.resultsL.map(el => {
         let exprNumer = algebra.parse(el.numerator[0])
         let exprDenom = algebra.parse(el.denominator[0])
@@ -103,6 +174,11 @@ export default {
           'denominator': exprDenom.toString()
         })
       })
+
+      const { numerator: num1, denum: denum1 } = makeLetterString(this.resultsL)
+      this.resultWithNumbers = num1
+      this.resultWithLetters = denum1
+
       for (let i = 0; i < this.countedResultL.length; i++) {
         const expr = algebra.parse(`(${this.fields[i].valueY} * 1 / (${this.countedResultL[i].denominator}))(${this.countedResultL[i].numerator})`)
         this.answerL.push(expr.toString())
@@ -124,6 +200,7 @@ export default {
       //   }
       // })
       this.renderChart = true
+      this.resultForEachArr = countWithPoint(this.resultsL, this.point)
     },
     paintChart () {
       this.renderChart(this.answerL)

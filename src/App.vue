@@ -1,18 +1,23 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+    <div class="nav">
+      <div class="nav__item">
+        <router-link to="/" tag="span" class="btn">Интерполяционный многочлен Лагранджа</router-link>
+      </div>
+      <div class="nav__item">
+        <router-link to="/about" tag="span" class="btn">Метод "Ньютона"</router-link>
+      </div>
     </div>
     <router-view/>
   </div>
 </template>
 
-<style>
-  #nav {
-    height: 77px;
-    background: #cccccc;
-    margin: 0;
-    padding: 0;
-  }
+<script>
+export default {
+  name: 'App'
+}
+</script>
+
+<style lang="sass">
+  @import './assets/style/main.sass'
 </style>
