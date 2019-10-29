@@ -1,24 +1,24 @@
 <template>
   <div class="input-form_middle">
-    <div>
+    <div class="input-form_middle__item">
       <label>Шаг между узловыми точками (h):</label>
       <input type="text" v-model.number="diff">
     </div>
-    <div>
+    <div class="input-form_middle__item">
       <label>Количество точек:</label>
       <input type="text" v-model.number="pointsAmmount">
     </div>
-    <div>
+    <div class="input-form_middle__item">
       <label>Начальная точка:</label>
       <input type="text" v-model.number="start">
     </div>
-    <div>
+    <div class="input-form_middle__item">
       <label>Точка:</label>
       <input type="text" v-model.number="point">
     </div>
     <div>
-      <button @click="init">Init fields</button>
-      <button @click="countTable">Count</button>
+      <button @click="init" class="form-btn">Init fields</button>
+      <button @click="countTable" class="form-btn">Count</button>
     </div>
     <div>
       <div v-if="fields.length > 0" class="input-form">
@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    <div class="ended-table">
+    <div class="ended-table" v-if="fields.length > 0">
       <div class="ended-table__item">
         <vue-mathjax :formula="`$$ i $$`" style="border"></vue-mathjax>
         <p v-for="(item, index) in fields" :key="`fields-${index}`">{{ index }}</p>
@@ -52,9 +52,15 @@
         <p v-for="(item, num) in arr" :key="`resArr[${index}]-${num}`">{{ item }}</p>
       </div>
     </div>
+    <div v-if="newtonFormule !== ''" class="input-form_middle">
+      <div class="initial-eq__item">
+        <vue-mathjax :formula="`$$ P_${fields.length - 1} = ${ newtonFormule } $$`"></vue-mathjax>
+      </div>
+      <div class="initial-eq__item">
+        <vue-mathjax :formula="`$$ ${ xExpLetters } = ${this.countExp.replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')} = ${this.countExpDec}$$`"></vue-mathjax>
+      </div>
+    </div>
 
-    <vue-mathjax :formula="`$$ P_${fields.length - 1} = ${ newtonFormule } $$`"></vue-mathjax>
-    <vue-mathjax :formula="`$$ ${ xExpLetters } = ${this.countExp.replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')} = ${this.countExpDec}$$`"></vue-mathjax>
   </div>
 </template>
 
@@ -147,11 +153,6 @@ export default {
     }
   },
   methods: {
-    addField () {
-      this.fields.push(
-        { labelX: 'X', valueX: '', labelY: 'Y', valueY: '' }
-      )
-    },
     init () {
       this.fields = []
       for (let i = 0; i < this.pointsAmmount; i++) {
@@ -187,16 +188,3 @@ export default {
   }
 }
 </script>
-
-<style>
-  .ended-table {
-    display: flex;
-    flex-wrap: nowrap;
-  }
-  .ended-table__item {
-    border: 1px solid #666;
-    padding: 20px;
-    text-align: center;
-    margin-right: -1px;
-  }
-</style>

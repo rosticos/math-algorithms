@@ -1,24 +1,24 @@
 <template>
   <div class="input-form_middle">
-    <div>
+    <div class="input-form_middle__item">
       <label>Шаг между узловыми точками (h):</label>
       <input type="text" v-model.number="diff">
     </div>
-    <div>
+    <div class="input-form_middle__item">
       <label>Количество точек:</label>
       <input type="text" v-model.number="pointsAmmount">
     </div>
-    <div>
+    <div class="input-form_middle__item">
       <label>Начальная точка:</label>
       <input type="text" v-model.number="start">
     </div>
-    <div>
+    <div class="input-form_middle__item">
       <label>Точка:</label>
       <input type="text" v-model.number="point">
     </div>
     <div>
-      <button @click="init">Init fields</button>
-      <button @click="countResultsL">Count</button>
+      <button @click="init" class="form-btn">Init fields</button>
+      <button @click="countResultsL" class="form-btn">Count</button>
     </div>
     <div>
       <div v-if="fields.length > 0" class="input-form">
@@ -36,7 +36,7 @@
     <div v-if="resultsL.length" class="input-form_middle">
       <h4>Начальные уравнения</h4>
       <div class="initial_eq">
-        <div v-for="(value, index) in resultsL" :key="`res-${index}`" style="margin-bottom: 32px; flex: 1 1 100%;">
+        <div v-for="(value, index) in resultsL" :key="`res-${index}`" class="initial-eq__item">
           <vue-mathjax v-if="value != null" :formula="`$$l_${index} = ${fields[index].valueY} * {${value.numerator.join('')} \\over${value.denominator.join('')}} = ${fields[index].valueY} *  {${countedResultL[index].numerator} \\over${countedResultL[index].denominator}}= ${answerL[index].replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')} $$`"></vue-mathjax>
         </div>
       </div>
@@ -44,7 +44,7 @@
       <vue-mathjax :formula="`$$ L_${fields.length - 1}(x) = ${grapg.replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')} $$`"></vue-mathjax>
     </div>
 
-    <div style="display: flex; justify-content: center; margin-top: 20px;">
+    <div style="display: flex; justify-content: center; margin: 20px 0px;">
       <line-chart
         v-if="renderChart"
         :func="grapg"
@@ -52,9 +52,20 @@
         ref="line-chart"
       />
     </div>
-
-    <div v-for="(item, index) in resultWithNumbers" :key="`resultWIthNum-${index}`">
-      <vue-mathjax :formula="`$$ \\frac{ ${item} }{ ${resultWithLetters[index]} } = \\frac{ ${resultsL[index].numerator.join('').replace(/x/g, point)} }{ ${resultsL[index].denominator.join('')} } = \\frac{ ${resultForEachArr[index].num} }{ ${resultForEachArr[index].denum} } $$`"></vue-mathjax>
+    <div class="input-form_middle">
+      <div v-for="(item, index) in resultWithNumbers" :key="`resultWIthNum-${index}`" class="initial-eq__item">
+        <vue-mathjax :formula="`$$ l_${index} (${point}) = \\frac{ ${item} }{ ${resultWithLetters[index]} } = \\frac{ ${resultsL[index].numerator.join('').replace(/x/g, point)} }{ ${resultsL[index].denominator.join('')} } = \\frac{ ${resultForEachArr[index].num} }{ ${resultForEachArr[index].denum} } = ${resultForEachArr[index].response} $$`"></vue-mathjax>
+      </div>
+    </div>
+    <div class="input-form_middle" v-if="functionRes !== ''">
+      <div class="initial-eq__item">
+        <vue-mathjax :formula="`$$ L_${resultWithNumbers.length - 1} (${point}) = ${this.functionRes} = ${functionNumbersResult.replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')} = ${functionNumbersResultDec} $$`"></vue-mathjax>
+      </div>
+    </div>
+    <div class="input-form_middle" v-if="functionRes !== ''" style="border: 1px solid black; padding: 10px">
+      <div style="padding: 10px;">
+        <vue-mathjax :formula="`$$ Ответ: L_${resultWithNumbers.length - 1} (${point}) = ${functionNumbersResultDec} $$`"></vue-mathjax>
+      </div>
     </div>
   </div>
 </template>
@@ -62,16 +73,34 @@
 <script>
 import algebra from 'algebra.js'
 import LineChart from './LineChart'
+// eslint-disable-next-line
 import { evaluate, parse } from 'mathjs'
 
+const countFunctionInPoint = (fields, resArr) => {
+  let str = ''
+  for (let i = 0; i < resArr.length; i++) {
+    if (i < resArr.length - 1) {
+      str += `(${fields[i].valueY}) \\cdot (${resArr[i].response}) +`
+    } else {
+      str += `(${fields[i].valueY}) \\cdot (${resArr[i].response})`
+    }
+  }
+  return str
+}
+
 const countWithPoint = (arr, point) => {
-  let result = arr.map(el => {
+  let result = arr.map((el) => {
     console.log(el)
     let num = parse(el.numerator.join('')).evaluate({ x: point })
     let denum = parse(el.denominator.join('')).evaluate()
+    let response = algebra.parse(`(${num}) / (${denum})`)
+    response = response.toString()
+    console.log(response)
+    response = response.replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')
     return {
       num,
-      denum
+      denum,
+      response
     }
   })
   return result
@@ -116,7 +145,10 @@ export default {
       pointsAmmount: 4,
       resultWithNumbers: [],
       resultWithLetters: [],
-      resultForEachArr: []
+      resultForEachArr: [],
+      functionRes: '',
+      functionNumbersResult: '',
+      functionNumbersResultDec: ''
     }
   },
   methods: {
@@ -201,6 +233,10 @@ export default {
       // })
       this.renderChart = true
       this.resultForEachArr = countWithPoint(this.resultsL, this.point)
+      this.functionRes = countFunctionInPoint(this.fields, this.resultForEachArr)
+      const lelel = algebra.parse(this.grapg)
+      this.functionNumbersResult = lelel.eval({ x: 2 }).toString()
+      this.functionNumbersResultDec = evaluate(this.functionNumbersResult)
     },
     paintChart () {
       this.renderChart(this.answerL)

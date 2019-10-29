@@ -2,6 +2,7 @@
 import { Line } from 'vue-chartjs'
 import algebra from 'algebra.js'
 import { evaluate } from 'mathjs'
+
 export default {
   extends: Line,
   props: ['func'],
