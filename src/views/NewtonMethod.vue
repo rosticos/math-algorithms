@@ -57,6 +57,9 @@
         <vue-mathjax :formula="`$$ P_${fields.length - 1} = ${ newtonFormule } $$`"></vue-mathjax>
       </div>
       <div class="initial-eq__item">
+        <vue-mathjax :formula="`$$ P_${fields.length - 1} = ${ countExpWithX } $$`"></vue-mathjax>
+      </div>
+      <div class="initial-eq__item">
         <vue-mathjax :formula="`$$ ${ xExpLetters } = ${this.countExp.replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')} = ${this.countExpDec}$$`"></vue-mathjax>
       </div>
     </div>
@@ -103,29 +106,37 @@ const factorial = (n) => {
 const makeExpressionNumbers = (arr, xArr, y0, h, point) => {
   let xExpLetters = `${y0}`
   let countExp = `${y0}`
+  let countExpWithX = `${y0}`
+
   for (let i = 0; i < arr.length; i++) {
     if (i === 0) {
       xExpLetters += `+ \\frac{${arr[i][0]}}{${h}}`
       countExp += `+ (${arr[i][0]} / ${h})`
+      countExpWithX += `+ \\frac{${arr[i][0]}}{${h}}`
 
       if (xArr[i] > 0) {
         xExpLetters += `(${point} - ${xArr[i]})`
         countExp += `(${point} - ${xArr[i]})`
+        countExpWithX += `(\\tilde{x} - ${xArr[i]})`
       } else {
         xExpLetters += `(${point} + ${Math.abs(xArr[i])})`
         countExp += `(${point} + ${Math.abs(xArr[i])})`
+        countExpWithX += `(\\tilde{x} + ${Math.abs(xArr[i])})`
       }
     } else {
       xExpLetters += `+ \\frac{${arr[i][0]}}{${h}^${i + 1} \\cdot ${i + 1}!}`
       countExp += `+ (${arr[i][0]} / (${h}^${i + 1} * ${factorial(i + 1)}))`
+      countExpWithX += `+ \\frac{${arr[i][0]}}{${h}^${i + 1} * ${factorial(i + 1)}}`
 
       for (let j = 0; j <= i; j++) {
         if (xArr[j] > 0) {
           xExpLetters += `(${point} - ${xArr[j]})`
           countExp += `(${point} - ${xArr[j]})`
+          countExpWithX += `(\\tilde{x} - ${xArr[j]})`
         } else {
           xExpLetters += `(${point} + ${Math.abs(xArr[j])})`
           countExp += `(${point} + ${Math.abs(xArr[j])})`
+          countExpWithX += `(\\tilde{x} + ${Math.abs(xArr[j])})`
         }
       }
     }
@@ -133,7 +144,8 @@ const makeExpressionNumbers = (arr, xArr, y0, h, point) => {
 
   return {
     xExpLetters,
-    countExp
+    countExp,
+    countExpWithX
   }
 }
 
@@ -149,7 +161,8 @@ export default {
       point: '-4',
       xExpLetters: '',
       countExp: '',
-      countExpDec: ''
+      countExpDec: '',
+      countExpWithX: ''
     }
   },
   methods: {
@@ -176,11 +189,12 @@ export default {
         this.resultArr.push(YiArr)
       }
       this.newtonFormule = makeExpressionLetters(this.fields)
-      console.log(this.resultArr)
+      console.log(this.newtonFormule)
 
       let xArr = this.fields.map(el => { return el.valueX })
       let yArr = this.fields.map(el => { return el.valueY })
-      const { xExpLetters, countExp } = makeExpressionNumbers(this.resultArr, xArr, yArr[0], this.diff, this.point)
+      const { xExpLetters, countExp, countExpWithX } = makeExpressionNumbers(this.resultArr, xArr, yArr[0], this.diff, this.point)
+      this.countExpWithX = countExpWithX
       this.xExpLetters = xExpLetters
       this.countExp = algebra.parse(countExp).toString()
       this.countExpDec = evaluate(this.countExp)

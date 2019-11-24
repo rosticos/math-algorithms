@@ -2,26 +2,26 @@
 import { Line } from 'vue-chartjs'
 import algebra from 'algebra.js'
 import { evaluate } from 'mathjs'
+import chartjsPluginAnnotation from 'chartjs-plugin-annotation' // eslint-disable-line
 
 export default {
   extends: Line,
-  props: ['func'],
+  props: ['func', 'labels'],
   data () {
     return {
       line: this.func
     }
   },
   mounted () {
-    console.log(this.func)
     this.addPlugin({
       beforeDraw: (chartInstance) => {
         const ctx = chartInstance.chart.ctx
-        ctx.fillStyle = '#eee'
+        // ctx.fillStyle = '#eee'
         ctx.fillRect(0, 0, chartInstance.chart.width, chartInstance.chart.height)
       },
       beforeInit: (chart) => {
         const data = chart.config.data
-        for (let i = 0; i < data.datasets.length; i++) {
+        for (let i = 0; i < 1; i++) {
           for (let j = 0; j < data.labels.length; j++) {
             const fct = data.datasets[i].function
             const x = data.labels[j]
@@ -31,35 +31,68 @@ export default {
         }
       }
     })
+
     this.renderChart({
       type: 'line',
-      labels: [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5],
-      scales: {
-        yAxes: [{
-          ticks: {
-            max: 10,
-            min: 0,
-            stepSize: 5
-          }
-        }]
-      },
+      labels: this.labelValues,
       datasets: [{
-        label: `f(x) = ${this.func}`, // Name it as you want
+        data: [],
+        label: `F(x) = ${this.func}`,
         function: (x) => {
           const expr = algebra.parse(this.func)
           const val = expr.eval({ x }).simplify().toString()
+          console.log(val)
           return evaluate(val)
         },
-        data: [], // Don't forget to add an empty data array, or else it will break
         borderColor: '#FC2525',
         backgroundColor: '#FFF',
         fill: false
-      }],
-      chartArea: {
-        backgroundColor: 'rgba(251, 85, 85, 0.4)'
+      }]
+    },
+    {
+      responsive: true,
+      tooltips: {
+        mode: 'index',
+        intersect: true
       },
-      responsive: true
+      annotation: {
+        annotations: [
+          {
+            type: 'line',
+            mode: 'horizontal',
+            scaleID: 'y-axis-0',
+            value: 0,
+            borderColor: 'rgb(75, 192, 192)',
+            borderWidth: 1
+          },
+          {
+            type: 'line',
+            mode: 'vertical',
+            scaleID: 'x-axis-0',
+            value: 0,
+            borderColor: 'rgb(75, 192, 192)',
+            borderWidth: 1
+          }
+        ]
+      }
     })
+  },
+  methods: {
+
+  },
+  computed: {
+    labelValues () {
+      let arr = this.labels.map(el => parseFloat(el.valueX))
+      arr.push(Math.max(...arr) + 2)
+      arr.unshift(Math.min(...arr) - 2)
+      arr = arr.sort((a, b) => a - b)
+
+      console.log(arr)
+      return arr
+    },
+    dataValues () {
+      return this.labels.map(el => parseFloat(el.valueX))
+    }
   }
 }
 </script>

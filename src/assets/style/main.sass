@@ -1,3 +1,7 @@
+$xs: 468px
+$md: 768px
+$lg: 1024px
+  
 html,
 body
   margin: 0
@@ -95,3 +99,34 @@ body
     text-align: center
     margin-right: -1px
 
+.container
+  display: flex
+  justify-content: center
+  flex-wrap: wrap
+
+  @media screen and ( max-width: $xs )
+    margin: 10px 20px
+  @media screen and ( max-width: $md ) and (min-width: $xs)
+    margin: 20px 40px
+  @media screen and ( max-width: $lg ) and (min-width: $md)
+    margin: 32px 100px
+  @media screen and ( min-width:  $lg)
+    margin: 32px 200px
+
+.table
+  border-collapse: collapse
+  &__row
+    margin-bottom: 20px
+  &__title
+    border-right: 1px solid #ccc
+    padding-right: 40px
+    text-align: right
+    padding-bottom: 40px
+  &__description
+    padding-left: 20px
+    padding-bottom: 40px
+  &__avatar
+    border-radius: 50%
+    border: 1px solid #999999
+    width: 200px
+    height: 200px

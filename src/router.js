@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Lagrandg from './views/Home.vue'
 
 Vue.use(Router)
 
@@ -10,16 +9,21 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'lagrandg',
-      component: Lagrandg
+      name: 'Home',
+      component: () => import(/* webpackChunkName: "about" */ './views/Home.vue')
     },
     {
-      path: '/about',
-      name: 'about',
+      path: '/lagrandj',
+      name: 'lagrandg',
+      component: () => import(/* webpackChunkName: "about" */ './views/LagrandjMethod.vue')
+    },
+    {
+      path: '/newton',
+      name: 'newton',
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+      component: () => import(/* webpackChunkName: "about" */ './views/NewtonMethod.vue')
     }
   ]
 })

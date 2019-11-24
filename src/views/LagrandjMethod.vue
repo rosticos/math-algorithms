@@ -28,7 +28,7 @@
       </div>
       <div v-for="(field, index) in fields" :key="index" class="input-form">
         <input type="text" :value="index" disabled class="input-form__item">
-        <input type="text" :value="field.valueX" disabled class="input-form__item">
+        <input type="text" v-model.number="field.valueX" class="input-form__item">
         <input type="text" v-model.number="field.valueY" class="input-form__item">
       </div>
     </div>
@@ -48,6 +48,7 @@
       <line-chart
         v-if="renderChart"
         :func="grapg"
+        :labels="fields"
         style="max-width: 500px; max-height: 500px;"
         ref="line-chart"
       />
@@ -72,7 +73,8 @@
 
 <script>
 import algebra from 'algebra.js'
-import LineChart from './LineChart'
+import LineChart from '../components/LineChart'
+require('round10').polyfill()
 // eslint-disable-next-line
 import { evaluate, parse } from 'mathjs'
 
@@ -139,8 +141,8 @@ export default {
       answerL: [],
       grapg: '',
       renderChart: false,
-      point: 2,
-      diff: 2,
+      point: -7.86,
+      diff: 0.3,
       start: -1,
       pointsAmmount: 4,
       resultWithNumbers: [],
@@ -157,7 +159,7 @@ export default {
       for (let i = 0; i < this.pointsAmmount; i++) {
         this.fields.push({
           labelX: 'X',
-          valueX: `${Number(this.start) + this.diff * i}`,
+          valueX: `${Math.round10((Number(this.start) + (this.diff * i)), -1)}`,
           labelY: 'Y',
           valueY: '' }
         )
@@ -183,10 +185,10 @@ export default {
         for (let j = 0; j < this.fields.length; j++) {
           if (j !== i) {
             if (this.fields[j].valueX < 0) {
-              numerator.push(`(x + ${Math.abs(parseInt(this.fields[j].valueX))})`)
-              denominator.push(`(${parseInt(this.fields[i].valueX)} + ${Math.abs(parseInt(this.fields[j].valueX))})`)
+              numerator.push(`(x + ${Math.abs(parseFloat(this.fields[j].valueX))})`)
+              denominator.push(`(${parseFloat(this.fields[i].valueX)} + ${Math.abs(parseFloat(this.fields[j].valueX))})`)
             } else {
-              numerator.push(`(x - ${parseInt(this.fields[j].valueX)})`)
+              numerator.push(`(x - ${parseFloat(this.fields[j].valueX)})`)
               denominator.push(`(${parseInt(this.fields[i].valueX)} - ${Math.abs(parseInt(this.fields[j].valueX))})`)
             }
           }
@@ -213,6 +215,7 @@ export default {
 
       for (let i = 0; i < this.countedResultL.length; i++) {
         const expr = algebra.parse(`(${this.fields[i].valueY} * 1 / (${this.countedResultL[i].denominator}))(${this.countedResultL[i].numerator})`)
+        console.log(expr)
         this.answerL.push(expr.toString())
       }
       let graphExp = algebra.parse(this.answerL[0])

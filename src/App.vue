@@ -1,15 +1,20 @@
 <template>
-  <div id="app">
+  <div>
     <div class="nav">
       <div class="nav__item">
-        <router-link to="/" tag="span" class="btn">Интерполяционный многочлен Лагранджа</router-link>
+        <router-link to="/" tag="span" class="btn">Описание проекта</router-link>
       </div>
       <div class="nav__item">
-        <router-link to="/about" tag="span" class="btn">Метод "Ньютона"</router-link>
+        <router-link to="/lagrandj" tag="span" class="btn">Интерполяционный многочлен Лагранджа</router-link>
+      </div>
+      <div class="nav__item">
+        <router-link to="/newton" tag="span" class="btn">Метод "Ньютона"</router-link>
       </div>
     </div>
-    <router-view/>
-  </div>
+    <div id="app">
+      <router-view/>
+    </div>
+</div>
 </template>
 
 <script>
