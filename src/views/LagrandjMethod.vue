@@ -55,17 +55,17 @@
     </div>
     <div class="input-form_middle">
       <div v-for="(item, index) in resultWithNumbers" :key="`resultWIthNum-${index}`" class="initial-eq__item">
-        <vue-mathjax :formula="`$$ l_${index} (${point}) = \\frac{ ${item} }{ ${resultWithLetters[index]} } = \\frac{ ${resultsL[index].numerator.join('').replace(/x/g, point)} }{ ${resultsL[index].denominator.join('')} } = \\frac{ ${resultForEachArr[index].num} }{ ${resultForEachArr[index].denum} } = ${resultForEachArr[index].response} $$`"></vue-mathjax>
+        <vue-mathjax :formula="`$$ l_${index} (${point}) = \\frac{ ${item} }{ ${resultWithLetters[index]} } = \\frac{ ${resultsL[index].numerator.join('').replace(/x/g, point)} }{ ${resultsL[index].denominator.join('')} } = \\frac{ ${Math.round10(resultForEachArr[index].num, -3)} }{ ${Math.round10(resultForEachArr[index].denum, -3)} } = ${resultForEachArr[index].response} = ${Math.round10(resultForEachArr[index].responseDec, -3)} $$`"></vue-mathjax>
       </div>
     </div>
     <div class="input-form_middle" v-if="functionRes !== ''">
       <div class="initial-eq__item">
-        <vue-mathjax :formula="`$$ L_${resultWithNumbers.length - 1} (${point}) = ${this.functionRes} = ${functionNumbersResult.replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')} = ${functionNumbersResultDec} $$`"></vue-mathjax>
+        <vue-mathjax :formula="`$$ L_${resultWithNumbers.length - 1} (${point}) = ${this.functionRes} = ${Math.round10(functionNumbersResultDec, -1)} $$`"></vue-mathjax>
       </div>
     </div>
     <div class="input-form_middle" v-if="functionRes !== ''" style="border: 1px solid black; padding: 10px">
       <div style="padding: 10px;">
-        <vue-mathjax :formula="`$$ Ответ: L_${resultWithNumbers.length - 1} (${point}) = ${functionNumbersResultDec} $$`"></vue-mathjax>
+        <vue-mathjax :formula="`$$ Ответ: L_${resultWithNumbers.length - 1} (${point}) = ${Math.round10(functionNumbersResultDec, -1)} $$`"></vue-mathjax>
       </div>
     </div>
   </div>
@@ -78,13 +78,35 @@ require('round10').polyfill()
 // eslint-disable-next-line
 import { evaluate, parse } from 'mathjs'
 
+const getResultDecNumber = (x) => {
+  let afterComma = 0
+  if (Number(x) === x && x % 1 !== 0) {
+    if (x.toString().indexOf(',') !== -1) {
+      console.log('COmmal!')
+      afterComma = countDecimals(x.replace(',', '.'))
+    } else {
+      console.log('Without COmma', x)
+      afterComma = countDecimals(x)
+    }
+  }
+  console.log('KEK', countDecimals(x))
+  return new algebra.Fraction(x * Math.pow(10, afterComma), Math.pow(10, afterComma))
+}
+
+const countDecimals = (value) => {
+  console.log('Comes', value.toString())
+  if (Math.floor(value) !== value)
+    return value.toString().split('.')[1].length || 0
+  return 0
+}
+
 const countFunctionInPoint = (fields, resArr) => {
   let str = ''
   for (let i = 0; i < resArr.length; i++) {
     if (i < resArr.length - 1) {
-      str += `(${fields[i].valueY}) \\cdot (${resArr[i].response}) +`
+      str += `(${fields[i].valueY}) \\cdot (${Math.round10(resArr[i].responseDec, -1)}) +`
     } else {
-      str += `(${fields[i].valueY}) \\cdot (${resArr[i].response})`
+      str += `(${fields[i].valueY}) \\cdot (${Math.round10(resArr[i].responseDec, -1)})`
     }
   }
   return str
@@ -92,17 +114,18 @@ const countFunctionInPoint = (fields, resArr) => {
 
 const countWithPoint = (arr, point) => {
   let result = arr.map((el) => {
-    console.log(el)
     let num = parse(el.numerator.join('')).evaluate({ x: point })
     let denum = parse(el.denominator.join('')).evaluate()
     let response = algebra.parse(`(${num}) / (${denum})`)
     response = response.toString()
-    console.log(response)
+    let responseDec = evaluate(response)
     response = response.replace(/([-\d]*)\/([-\d]*)/g, '\\frac{$1}{$2}')
+
     return {
       num,
       denum,
-      response
+      response,
+      responseDec
     }
   })
   return result
@@ -139,6 +162,7 @@ export default {
       fields: [],
       resultsL: [],
       answerL: [],
+      answerLDec: [],
       grapg: '',
       renderChart: false,
       point: -7.86,
@@ -215,31 +239,26 @@ export default {
 
       for (let i = 0; i < this.countedResultL.length; i++) {
         const expr = algebra.parse(`(${this.fields[i].valueY} * 1 / (${this.countedResultL[i].denominator}))(${this.countedResultL[i].numerator})`)
-        console.log(expr)
         this.answerL.push(expr.toString())
       }
+
       let graphExp = algebra.parse(this.answerL[0])
       for (let i = 1; i < this.answerL.length; i++) {
         graphExp = graphExp.add(algebra.parse(this.answerL[i]))
       }
+
       this.grapg = graphExp.toString()
-      // this.resultsL.map(exprs => {
-      //   let expr = algebra.parse(`${exprs[0]}${exprs[1]}`)
-      //   console.log('Before loop ->', expr.toString())
-      //   for (let i = 2; i < exprs.length; i++) {
-      //     for (let i = 2; i < exprs.length; i++) {
-      //       console.log(exprs[i])
-      //     }
-      //     expr = expr.multiply(algebra.parse(exprs[i]))
-      //     console.log('After iter ->', expr.toString())
-      //   }
-      // })
+
       this.renderChart = true
       this.resultForEachArr = countWithPoint(this.resultsL, this.point)
       this.functionRes = countFunctionInPoint(this.fields, this.resultForEachArr)
+      console.log('kek')
+      console.log('Value', getResultDecNumber(this.point))
       const lelel = algebra.parse(this.grapg)
-      this.functionNumbersResult = lelel.eval({ x: 2 }).toString()
-      this.functionNumbersResultDec = evaluate(this.functionNumbersResult)
+      // Error here
+      this.functionNumbersResult = lelel.eval({x: getResultDecNumber(this.point)}).toString()
+      console.log('RES', this.functionNumbersResult)
+      this.functionNumbersResultDec = evaluate(this.functionNumbersResult)  
     },
     paintChart () {
       this.renderChart(this.answerL)

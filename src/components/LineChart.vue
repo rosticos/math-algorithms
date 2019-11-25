@@ -4,6 +4,13 @@ import algebra from 'algebra.js'
 import { evaluate } from 'mathjs'
 import chartjsPluginAnnotation from 'chartjs-plugin-annotation' // eslint-disable-line
 
+const countDecimals = (value) => {
+  console.log('Comes', value.toString())
+  if (Math.floor(value) !== value)
+    return value.toString().split('.')[1].length || 0
+  return 0
+}
+
 export default {
   extends: Line,
   props: ['func', 'labels'],
@@ -39,8 +46,20 @@ export default {
         data: [],
         label: `F(x) = ${this.func}`,
         function: (x) => {
+          let afterComma = 0
+          if (Number(x) === x && x % 1 !== 0) {
+            if (x.toString().indexOf(',') !== -1) {
+              // console.log('COmmal!')
+              afterComma = countDecimals(x.replace(',', '.'))
+            } else {
+              // console.log('Without COmma', x)
+              afterComma = countDecimals(x)
+            }
+          }
           const expr = algebra.parse(this.func)
-          const val = expr.eval({ x }).simplify().toString()
+          // console.log('KEK', countDecimals(x))
+          const pointFraction = new algebra.Fraction(x * Math.pow(10, afterComma), Math.pow(10, afterComma))
+          const val = expr.eval({ x: pointFraction }).simplify().toString()
           console.log(val)
           return evaluate(val)
         },
