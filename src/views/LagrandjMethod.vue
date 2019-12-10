@@ -2,36 +2,59 @@
   <div class="input-form_middle">
     <div class="input-form_middle__item">
       <label>Шаг между узловыми точками (h):</label>
-      <input type="text" v-model.number="diff">
+      <input type="text" class="input-form__item-header" v-model.number="diff">
     </div>
     <div class="input-form_middle__item">
       <label>Количество точек:</label>
-      <input type="text" v-model.number="pointsAmmount">
+      <input type="text" class="input-form__item-header" v-model.number="pointsAmmount">
     </div>
     <div class="input-form_middle__item">
       <label>Начальная точка:</label>
-      <input type="text" v-model.number="start">
+      <input type="text" class="input-form__item-header" v-model.number="start">
     </div>
     <div class="input-form_middle__item">
       <label>Точка:</label>
-      <input type="text" v-model.number="point">
+      <input type="text" class="input-form__item-header" v-model.number="point">
     </div>
-    <div>
-      <button @click="init" class="form-btn">Init fields</button>
-      <button @click="countResultsL" class="form-btn">Count</button>
+    <div style="margin-top: 40px">
+      <el-button
+        type="warning"
+        v-if="countedResultL.length === 0"
+        @click="init"
+      >
+        Заполнить начальные данные
+      </el-button>
+
+      <el-button
+        type="warning"
+        v-else
+        @click="reset"
+      >
+        Очистить поля
+      </el-button>
     </div>
-    <div>
-      <div v-if="fields.length > 0" class="input-form">
-        <span class="input-form__item_text">i</span>
-        <span class="input-form__item_text">x</span>
-        <span class="input-form__item_text">y</span>
+    <div style="margin: 40px 0">
+      <div>
+        <div v-if="fields.length > 0" class="input-form">
+          <input type="text" value="i" disabled class="input-form__item input-form__item_disabled">
+          <input type="text" value="X" disabled class="input-form__item input-form__item_disabled">
+          <input type="text" value="Y" disabled class="input-form__item input-form__item_disabled">
+        </div>
+        <div v-for="(field, index) in fields" :key="index" class="input-form">
+          <input type="text" :value="index" disabled class="input-form__item input-form__item_disabled">
+          <input type="text" v-model.number="field.valueX" class="input-form__item">
+          <input type="text" v-model.number="field.valueY" class="input-form__item">
+        </div>
       </div>
-      <div v-for="(field, index) in fields" :key="index" class="input-form">
-        <input type="text" :value="index" disabled class="input-form__item">
-        <input type="text" v-model.number="field.valueX" class="input-form__item">
-        <input type="text" v-model.number="field.valueY" class="input-form__item">
-      </div>
     </div>
+
+    <el-button
+      v-if="checkFields && countedResultL.length === 0"
+      type="warning"
+      @click="countResultsL"
+    >
+      Рассчитать
+    </el-button>
 
     <div v-if="resultsL.length" class="input-form_middle">
       <h4>Начальные уравнения</h4>
@@ -186,6 +209,25 @@ export default {
         )
       }
     },
+    reset () {
+      this.countedResultL = []
+      this.fields = []
+      this.resultsL = []
+      this.answerL = []
+      this.answerLDec = []
+      this.grapg = ''
+      this.renderChart = false
+      this.point = -7.86
+      this.diff = 0.3
+      this.start = -1
+      this.pointsAmmount = 4
+      this.resultWithNumbers = []
+      this.resultWithLetters = []
+      this.resultForEachArr = []
+      this.functionRes = ''
+      this.functionNumbersResult = ''
+      this.functionNumbersResultDec = ''
+    },
     addField () {
       this.fields.push(
         { labelX: 'X', valueX: '', labelY: 'Y', valueY: '' }
@@ -249,12 +291,9 @@ export default {
       this.renderChart = true
       this.resultForEachArr = countWithPoint(this.resultsL, this.point)
       this.functionRes = countFunctionInPoint(this.fields, this.resultForEachArr)
-      console.log('kek')
-      console.log('Value', getResultDecNumber(this.point))
       const lelel = algebra.parse(this.grapg)
       // Error here
       this.functionNumbersResult = lelel.eval({ x: getResultDecNumber(this.point) }).toString()
-      console.log('RES', this.functionNumbersResult)
       this.functionNumbersResultDec = evaluate(this.functionNumbersResult)
     },
     paintChart () {
@@ -264,6 +303,15 @@ export default {
   computed: {
     numeratorIndex1 () {
       return `$$ ${this.countedResultL[0].numerator} $$`
+    },
+    checkFields () {
+      if (this.fields.length === 0) return false
+
+      const showArray = this.fields.map(el => {
+        return Object.values(el)
+      })
+
+      return showArray.flat().every(el => el !== '')
     }
   }
 }

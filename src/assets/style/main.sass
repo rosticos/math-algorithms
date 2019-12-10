@@ -1,0 +1,160 @@
+$xs: 468px
+$md: 768px
+$lg: 1024px
+  
+html,
+body
+  margin: 0
+  padding: 0
+  font-family: 'Roboto', sans-serif
+
+.nav
+  width: 100%
+  background-color: #666666
+  border-bottom: 1px solid #999999
+  height: 72px
+  display: flex
+  align-items: center
+  padding-left: 20px
+  margin-bottom: 20px
+
+  &__item
+    cursor: pointer
+    text-decoration: none
+
+.initial-eq
+  display: flex
+  flex-wrap: wrap
+
+  &__item
+    margin-bottom: 32px
+    flex: 1 1 100%
+
+.form-btn
+  border-radius: 5px
+  background-color: #ddd
+  padding: 5px 15px
+  transition: top 1s ease-out 0.5s
+  border: 1px solid #ddd
+
+  &:hover
+    background-color: #ccc
+    border: 1px solid #ccc
+
+  & + &
+    margin-left: 15px
+    
+
+.btn
+  height: 72px
+  padding: 0 32px
+  margin-left: -1px
+  color: #ffffff
+  transition: top 1s ease-out 0.5s
+
+  &:hover
+    color: #cccccc
+
+.input-form
+  display: inline-flex
+  flex-direction: column
+  box-shadow: none
+  background-image: none
+
+  &_middle
+    display: flex
+    flex-direction: column
+    align-items: center
+
+    &__item
+      margin: 10px 0px
+    
+
+  &__item
+    padding: 10px 20px
+    border: 1px solid black
+    margin-top: -1px
+    margin-left: -1px
+    width: 50px
+    height: 50px
+    font-size: 18px
+    text-align: center
+
+    &-header
+      width: 50px
+      height: 30px
+      text-align: center
+      margin-left: 20px
+      border-radius: 2px solid #ccc
+
+    &_disabled
+      background: #cccccc
+      color: #333
+      cursor: not-allowed
+
+    &_text
+      padding: 9px 19px
+      border: 1px solid rgb(84, 92, 100)
+      margin-top: -1px
+      margin-left: -1px
+  
+.ended-table
+  display: flex
+  flex-wrap: nowrap
+  margin: 15px 0px
+
+  &__item
+    border: 1px solid rgb(84, 92, 100)
+    padding: 20px
+    text-align: center
+    margin-right: -1px
+
+.container
+  display: flex
+  justify-content: center
+  flex-wrap: wrap
+
+  @media screen and ( max-width: $xs )
+    margin: 10px 20px
+  @media screen and ( max-width: $md ) and (min-width: $xs)
+    margin: 20px 40px
+  @media screen and ( max-width: $lg ) and (min-width: $md)
+    margin: 32px 100px
+  @media screen and ( min-width:  $lg)
+    margin: 32px 200px
+
+.table
+  border-collapse: collapse
+  &__row
+    margin-bottom: 20px
+  &__title
+    border-right: 1px solid #ccc
+    padding-right: 40px
+    text-align: right
+    padding-bottom: 40px
+  &__description
+    padding-left: 20px
+    padding-bottom: 40px
+  &__avatar
+    border-radius: 50%
+    border: 1px solid #999999
+    width: 200px
+    height: 200px
+
+.avatar
+  margin: 10px auto
+  width: 100%
+  max-width: 100px
+  text-align: center
+
+.name
+  padding: 0
+  margin: 0
+  line-height: 20px
+  font-size: 20px
+  text-align: center
+
+.role
+  text-align: center
+  padding: 0
+  margin: 0

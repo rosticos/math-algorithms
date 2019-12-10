@@ -2,36 +2,60 @@
   <div class="input-form_middle">
     <div class="input-form_middle__item">
       <label>Шаг между узловыми точками (h):</label>
-      <input type="text" v-model.number="diff">
+      <input type="text" class="input-form__item-header" v-model.number="diff">
     </div>
     <div class="input-form_middle__item">
       <label>Количество точек:</label>
-      <input type="text" v-model.number="pointsAmmount">
+      <input type="text" class="input-form__item-header" v-model.number="pointsAmmount">
     </div>
     <div class="input-form_middle__item">
       <label>Начальная точка:</label>
-      <input type="text" v-model.number="start">
+      <input type="text" class="input-form__item-header" v-model.number="start">
     </div>
     <div class="input-form_middle__item">
       <label>Точка:</label>
-      <input type="text" v-model.number="point">
+      <input type="text" class="input-form__item-header" v-model.number="point">
     </div>
-    <div>
-      <button @click="init" class="form-btn">Init fields</button>
-      <button @click="countTable" class="form-btn">Count</button>
+    <div style="margin-top: 40px">
+      <el-button
+        type="warning"
+        v-if="countExpDec.length === 0"
+        @click="init"
+      >
+        Заполнить начальные данные
+      </el-button>
+
+      <el-button
+        type="warning"
+        v-else
+        @click="reset"
+      >
+        Очистить поля
+      </el-button>
     </div>
-    <div>
-      <div v-if="fields.length > 0" class="input-form">
-        <span class="input-form__item_text">i</span>
-        <span class="input-form__item_text">x</span>
-        <span class="input-form__item_text">y</span>
+
+    <div style="margin: 40px 0">
+      <div>
+        <div v-if="fields.length > 0" class="input-form">
+          <input type="text" value="i" disabled class="input-form__item input-form__item_disabled">
+          <input type="text" value="X" disabled class="input-form__item input-form__item_disabled">
+          <input type="text" value="Y" disabled class="input-form__item input-form__item_disabled">
+        </div>
+        <div v-for="(field, index) in fields" :key="index" class="input-form">
+          <input type="text" :value="index" disabled class="input-form__item input-form__item_disabled">
+          <input type="text" v-model.number="field.valueX" class="input-form__item input-form__item_disabled">
+          <input type="text" v-model.number="field.valueY" class="input-form__item">
+        </div>
       </div>
-      <div v-for="(field, index) in fields" :key="index" class="input-form">
-        <input type="text" :value="index" disabled class="input-form__item">
-        <input type="text" :value="field.valueX" disabled class="input-form__item">
-        <input type="text" v-model.number="field.valueY" class="input-form__item">
-      </div>
     </div>
+
+    <el-button
+      v-if="checkFields && countExpDec.length === 0"
+      type="warning"
+      @click="countTable"
+    >
+      Рассчитать
+    </el-button>
 
     <div class="ended-table" v-if="fields.length > 0">
       <div class="ended-table__item">
@@ -165,6 +189,17 @@ export default {
       countExpWithX: ''
     }
   },
+  computed: {
+    checkFields () {
+      if (this.fields.length === 0) return false
+
+      const showArray = this.fields.map(el => {
+        return Object.values(el)
+      })
+
+      return showArray.flat().every(el => el !== '')
+    }
+  },
   methods: {
     init () {
       this.fields = []
@@ -176,6 +211,19 @@ export default {
           valueY: '' }
         )
       }
+    },
+    reset () {
+      this.fields = []
+      this.newtonFormule = ''
+      this.resultArr = []
+      this.diff = 2
+      this.start = -5
+      this.pointsAmmount = 4
+      this.point = -4
+      this.xExpLetters = ''
+      this.countExp = ''
+      this.countExpDec = ''
+      this.countExpWithX = ''
     },
     removeField () {
       this.fields.pop()

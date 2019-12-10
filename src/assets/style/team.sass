@@ -1,0 +1,29 @@
+.team-grid
+  width: 100%
+
+  &__header
+    text-align: center
+
+  &__container
+    display: grid
+    grid-template-columns: 25% auto
+
+    @media screen and ( max-width: $xs )
+      grid-template-columns: auto
+
+    @media screen and ( max-width: $md ) and (min-width: $xs)
+      grid-template-columns: auto
+
+    &__aside
+      grid-column: 1
+
+    &__content
+      grid-column: 2
+
+      @media screen and ( max-width: $xs )
+        grid-column: 1
+      @media screen and ( max-width: $md ) and (min-width: $xs)
+        grid-column: 1
+
+    & + &
+      margin-top: 20px
