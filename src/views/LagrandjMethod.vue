@@ -82,21 +82,18 @@ const getResultDecNumber = (x) => {
   let afterComma = 0
   if (Number(x) === x && x % 1 !== 0) {
     if (x.toString().indexOf(',') !== -1) {
-      console.log('COmmal!')
       afterComma = countDecimals(x.replace(',', '.'))
     } else {
-      console.log('Without COmma', x)
       afterComma = countDecimals(x)
     }
   }
-  console.log('KEK', countDecimals(x))
   return new algebra.Fraction(x * Math.pow(10, afterComma), Math.pow(10, afterComma))
 }
 
 const countDecimals = (value) => {
-  console.log('Comes', value.toString())
-  if (Math.floor(value) !== value)
+  if (Math.floor(value) !== value) {
     return value.toString().split('.')[1].length || 0
+  }
   return 0
 }
 
@@ -256,9 +253,9 @@ export default {
       console.log('Value', getResultDecNumber(this.point))
       const lelel = algebra.parse(this.grapg)
       // Error here
-      this.functionNumbersResult = lelel.eval({x: getResultDecNumber(this.point)}).toString()
+      this.functionNumbersResult = lelel.eval({ x: getResultDecNumber(this.point) }).toString()
       console.log('RES', this.functionNumbersResult)
-      this.functionNumbersResultDec = evaluate(this.functionNumbersResult)  
+      this.functionNumbersResultDec = evaluate(this.functionNumbersResult)
     },
     paintChart () {
       this.renderChart(this.answerL)

@@ -6,8 +6,9 @@ import chartjsPluginAnnotation from 'chartjs-plugin-annotation' // eslint-disabl
 
 const countDecimals = (value) => {
   console.log('Comes', value.toString())
-  if (Math.floor(value) !== value)
+  if (Math.floor(value) !== value) {
     return value.toString().split('.')[1].length || 0
+  }
   return 0
 }
 
