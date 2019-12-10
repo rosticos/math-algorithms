@@ -4,7 +4,7 @@
     <div class="container">
       <div style="display: grid; grid-template-columns: 300px 300px 300px;">
         <div v-for="(unit, index) in team" :key="unit.name" style="text-align: center">
-          <img :src="`/img/icons/${index + 1}.png`" class="avatar" alt="photo">
+          <img :src="`/img/${index + 1}.png`" class="avatar" alt="photo">
           <div class="description">
             <p class="name">{{ unit.name }}</p>
             <p class="role">{{ unit.role }}</p>
